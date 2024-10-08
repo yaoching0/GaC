@@ -5,7 +5,7 @@ import time
 import ray
 import torch
 from accelerate import dispatch_model, infer_auto_device_map
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 from .gac_gen_utils import *
 
@@ -23,10 +23,29 @@ class ModelGenerator:
         max_memory={0: "80GiB"},
         model_ensemble_weight=1,
         use_cache=True,
+        quantization="none",
     ):
 
+        quantization_options = {
+            "8bit": BitsAndBytesConfig(load_in_8bit=True),
+            "4bit": BitsAndBytesConfig(load_in_4bit=True),
+            "none": None,
+        }
+
+        # Retrieve the appropriate quantization_config
+        quantization_config = quantization_options.get(quantization)
+
+        # Raise an error if an invalid quantization option is provided
+        if quantization_config is None and quantization != "none":
+            raise ValueError(
+                f"Invalid quantization value '{quantization}'. Allowed values are: 'none', '8bit', '4bit'."
+            )
+
         model = AutoModelForCausalLM.from_pretrained(
-            model_path, torch_dtype=torch.float16, trust_remote_code=True
+            model_path,
+            torch_dtype=torch.float16,
+            trust_remote_code=True,
+            quantization_config=quantization_config,
         )
 
         device_map = infer_auto_device_map(
