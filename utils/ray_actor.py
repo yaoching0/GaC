@@ -5,7 +5,8 @@ import time
 import ray
 import torch
 from accelerate import dispatch_model, infer_auto_device_map
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import (AutoModelForCausalLM, AutoTokenizer,
+                          BitsAndBytesConfig)
 
 from .gac_gen_utils import *
 
