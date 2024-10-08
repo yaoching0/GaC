@@ -48,11 +48,13 @@ def setup_model_actors_and_data(config: List[Dict], norm_type: str, threshold: f
     else:
         real_threshold = threshold = 1
         logger.info(f"Every token will be ensembled, meaning the threshold will not be ignored!")
-    
+
+    config = validate_and_update_quantization(config)
+
     # Initialize model actors based on configuration and GPU requirements
     model_actors_list = [
         get_remote_model_generator_class(model_config["num_gpus"]).remote(
-            model_path=model_config["weight"], max_memory=model_config["max_memory"], model_name=model_config["name"], model_ensemble_weight=model_config["score"], use_cache=(primary_index == -1) or (i == primary_index)
+            model_path=model_config["weight"], max_memory=model_config["max_memory"], model_name=model_config["name"], model_ensemble_weight=model_config["score"], use_cache=(primary_index == -1) or (i == primary_index), quantization=model_config["quantization"]
         )
         for i,model_config in enumerate(config)
     ]
@@ -103,6 +105,46 @@ def setup_model_actors_and_data(config: List[Dict], norm_type: str, threshold: f
         real_threshold,
     )
     
+def validate_and_update_quantization(model_config: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """
+    Validates the 'quantization' field in each dictionary of a list of model configurations,
+    and adds the 'quantization' field with a default value of 'none' if it's missing.
+
+    Args:
+        model_config (List[Dict[str, str]]): 
+            A list of dictionaries, where each dictionary represents a model configuration.
+            Each dictionary should contain a 'quantization' key, which must have one of the 
+            following values: 'none', '8bit', or '4bit'. If the 'quantization' key is missing,
+            it will be added with a default value of 'none'.
+
+    Raises:
+        ValueError: If any 'quantization' value is not one of 'none', '8bit', or '4bit'.
+
+    Returns:
+        List[Dict[str, str]]: The updated list of model configurations with valid 'quantization' values.
+    """
+    
+    # Define the valid quantization options
+    valid_quantization_values = {'none', '8bit', '4bit'}
+    
+    # Loop through each configuration in the input list
+    for idx, config in enumerate(model_config):
+        # Check if 'quantization' key exists, if not, set it to 'none'
+        if 'quantization' not in config:
+            config['quantization'] = 'none'
+        
+        # Get the 'quantization' value
+        quantization_value = config['quantization']
+        
+        # Check if the value is valid, otherwise raise an error with details
+        if quantization_value not in valid_quantization_values:
+            raise ValueError(
+                f"Invalid quantization value '{quantization_value}' in config at index {idx}. "
+                f"Allowed values are: {valid_quantization_values}"
+            )
+    
+    # Return the updated list of configurations
+    return model_config
 
 def check_priorities(dict_list):
     """

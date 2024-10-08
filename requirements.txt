@@ -11,3 +11,4 @@ torch==2.2.1
 tqdm==4.66.2
 transformers==4.44.0
 uvicorn==0.30.5
+bitsandbytes
