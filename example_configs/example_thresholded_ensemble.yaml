@@ -11,7 +11,7 @@ CONFIG_API_SERVER:
     score: 100
     priority: 'primary'
     quantization: 'none' # 'none'/'8bit'/'4bit'
-    
+  
   - weight: '[Please replace with the path with the local model weight]' # or 'openchat/openchat-3.5-0106'
     max_memory:
       0: '24GiB'
