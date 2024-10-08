@@ -78,6 +78,7 @@ CONFIG_API_SERVER:
     name: 'SOLAR-10.7B-Instruct-v1.0'
     score: 100
     priority: 'supportive' # 'primary' or 'supportive'
+    quantization: 'none' # 'none'/'8bit'/'4bit'
   
   - weight: '[Please replace with the path to the local model weight]' # or 'openchat/openchat-3.5-0106'
     max_memory:
@@ -86,6 +87,7 @@ CONFIG_API_SERVER:
     name: 'openchat-3.5-0106'
     score: 100
     priority: 'supportive' # 'primary' or 'supportive'
+    quantization: 'none' # 'none'/'8bit'/'4bit'
 ```
 
 > **Note**: Please ensure that the number of GPUs on your computer is greater than the sum of all `num_gpus` values, and that the `max_memory` index for each model always starts from `0` (you can assume each model runs on an independent machine managed by Ray).
@@ -99,6 +101,7 @@ CONFIG_API_SERVER:
   - **max_memory**: Controls how much memory each GPU uses. Since each model is managed independently by Ray, the GPU IDs always start from **0**. For example, if you set `num_gpus` to 2, you should allocate the maximum memory for each GPU, such as `{0: 'xxGiB', 1: 'xxGiB'}`.
   - **num_gpus**: Number of GPUs allocated to this model. Controlled by Ray. To load two models on one GPU, set `num_gpus` to 0.5 for both models. So, a total of 0.5+0.5=1 GPU will be used in this case.
   - **priority**: If all models are 'supportive', the ensemble will be performed at every generation step. For threshold-based ensembling, set the gate model's priority to "primary".
+  - **quantization**: Whether to load the model with `4bit` or `8bit` quantization. Setting `'none'` will use the default data type specified in the huggingface model config.
 - **NORM_TYPE_API_SERVER**: Ensemble weight type, 'average' or 'score'. 'Score' means each model's output vector in the GaC ensemble is weighted by its score divided by the total score.
 - **THRESHOLD_API_SERVER**: Threshold for ensemble. This parameter is ineffective if all models are supportive.
 </details>

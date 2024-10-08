@@ -10,6 +10,7 @@ CONFIG_API_SERVER:
     name: 'SOLAR-10.7B-Instruct-v1.0'
     score: 100
     priority: 'supportive'
+    quantization: 'none' # 'none'/'8bit'/'4bit'
   
   - weight: '[Please replace with the path with the local model weight]' # or 'openchat/openchat-3.5-0106'
     max_memory:
@@ -18,3 +19,4 @@ CONFIG_API_SERVER:
     name: 'openchat-3.5-0106'
     score: 100
     priority: 'supportive'
+    quantization: 'none' # 'none'/'8bit'/'4bit'
